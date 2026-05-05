@@ -9,8 +9,8 @@ stages:
       size: 25090218
     - path: params.yaml
       hash: md5
-      md5: c54e09604432abbe222e3baa2f331955
-      size: 270
+      md5: 1c89163037274feadff7776f95a2b78d
+      size: 560
     - path: src/components/data_ingestion.py
       hash: md5
       md5: 7935aebb1fbe015dd41495f6ff1596b3
@@ -29,8 +29,8 @@ stages:
       size: 22281394
     - path: params.yaml
       hash: md5
-      md5: c54e09604432abbe222e3baa2f331955
-      size: 270
+      md5: 1c89163037274feadff7776f95a2b78d
+      size: 560
     - path: src/components/data_preprocessing.py
       hash: md5
       md5: 979983dd193176ed6d53cf06b760e9ef
@@ -44,3 +44,27 @@ stages:
       hash: md5
       md5: 520ce232741080c71530138540733292
       size: 5590
+  model_training:
+    cmd: python src/components/model_training.py
+    deps:
+    - path: data/processed/processed.csv
+      hash: md5
+      md5: 034d62f0d042725de1355eb8324ff43e
+      size: 27449265
+    - path: params.yaml
+      hash: md5
+      md5: 1c89163037274feadff7776f95a2b78d
+      size: 560
+    - path: src/components/model_training.py
+      hash: md5
+      md5: 05c04d19db0237487298b3d369e9d76b
+      size: 5740
+    outs:
+    - path: models/model.pkl
+      hash: md5
+      md5: 6a4432dd701f048ad2c6bdd8c4dff575
+      size: 1051
+    - path: src/artifacts/scaler.pkl
+      hash: md5
+      md5: 8c862ae44f8444fca93f53dd4481fb58
+      size: 1495

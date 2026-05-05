@@ -16,4 +16,14 @@ stages:
       - params.yaml
     outs:
       - data/processed/processed.csv
-      - src/artifacts/encoder.pkl      
+      - src/artifacts/encoder.pkl  
+
+  model_training:
+    cmd: python src/components/model_training.py
+    deps:
+      - src/components/model_training.py
+      - data/processed/processed.csv
+      - params.yaml
+    outs:
+      - models/model.pkl
+      - src/artifacts/scaler.pkl        
