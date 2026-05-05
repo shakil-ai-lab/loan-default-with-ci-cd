@@ -1,0 +1,3 @@
+data_ingestion:
+  raw_data_path: data/raw/loan.csv
+  clean_data_path: data/interim/cleaned.csv

@@ -1,30 +1,88 @@
-# -*- coding: utf-8 -*-
-import click
+import os
+import pandas as pd
+import yaml
 import logging
-from pathlib import Path
-from dotenv import find_dotenv, load_dotenv
+
+# ---------------- LOGGER ---------------- #
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
+# ---------------- UTILS ---------------- #
+def read_params(config_path="params.yaml"):
+    try:
+        with open(config_path) as yaml_file:
+            config = yaml.safe_load(yaml_file)
+        return config
+    except Exception as e:
+        logging.error(f"Error reading params.yaml: {e}")
+        raise
 
 
-@click.command()
-@click.argument('input_filepath', type=click.Path(exists=True))
-@click.argument('output_filepath', type=click.Path())
-def main(input_filepath, output_filepath):
-    """ Runs data processing scripts to turn raw data from (../raw) into
-        cleaned data ready to be analyzed (saved in ../processed).
-    """
-    logger = logging.getLogger(__name__)
-    logger.info('making final data set from raw data')
+# ---------------- CORE FUNCTIONS ---------------- #
+def load_data(path):
+    try:
+        logging.info(f"Loading data from {path}")
+        df = pd.read_csv(path)
+        logging.info(f"Data loaded successfully with shape {df.shape}")
+        return df
+    except Exception as e:
+        logging.error(f"Error loading data: {e}")
+        raise
 
 
-if __name__ == '__main__':
-    log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    logging.basicConfig(level=logging.INFO, format=log_fmt)
+def basic_cleaning(df):
+    try:
+        logging.info("Starting basic cleaning")
 
-    # not used in this stub but often useful for finding various files
-    project_dir = Path(__file__).resolve().parents[2]
+        # Remove ID column
+        df = df.drop("LoanID", axis=1, errors="ignore")
 
-    # find .env automagically by walking up directories until it's found, then
-    # load up the .env entries as environment variables
-    load_dotenv(find_dotenv())
+        # Clean binary/ordinal columns
+        for col in ['Education', 'HasCoSigner', 'HasMortgage', 'HasDependents']:
+            if col in df.columns:
+                df[col] = df[col].astype(str).str.strip()
 
-    main()
+        logging.info("Basic cleaning completed")
+        return df
+
+    except Exception as e:
+        logging.error(f"Error in cleaning: {e}")
+        raise
+
+
+def save_data(df, output_path):
+    try:
+        logging.info(f"Saving cleaned data to {output_path}")
+
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        df.to_csv(output_path, index=False)
+
+        logging.info("Data saved successfully")
+
+    except Exception as e:
+        logging.error(f"Error saving data: {e}")
+        raise
+
+
+# ---------------- PIPELINE FUNCTION ---------------- #
+def run_data_ingestion(config_path="params.yaml"):
+    try:
+        config = read_params(config_path)["data_ingestion"]
+
+        df = load_data(config["raw_data_path"])
+        df = basic_cleaning(df)
+
+        save_data(df, config["clean_data_path"])
+
+        logging.info("Data ingestion stage completed successfully")
+
+    except Exception as e:
+        logging.error(f"Data ingestion pipeline failed: {e}")
+        raise
+
+
+# ---------------- MAIN ---------------- #
+if __name__ == "__main__":
+    run_data_ingestion()
