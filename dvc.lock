@@ -1,0 +1,46 @@
+schema: '2.0'
+stages:
+  data_ingestion:
+    cmd: python src/components/data_ingestion.py
+    deps:
+    - path: data/raw/loan_default.csv
+      hash: md5
+      md5: 5d5ab10d35d78fa61123f0df450afaf5
+      size: 25090218
+    - path: params.yaml
+      hash: md5
+      md5: c54e09604432abbe222e3baa2f331955
+      size: 270
+    - path: src/components/data_ingestion.py
+      hash: md5
+      md5: 7935aebb1fbe015dd41495f6ff1596b3
+      size: 2421
+    outs:
+    - path: data/interim/cleaned.csv
+      hash: md5
+      md5: 85d37ce84034e704702c84d6e5c05a8c
+      size: 22281394
+  data_preprocessing:
+    cmd: python src/components/data_preprocessing.py
+    deps:
+    - path: data/interim/cleaned.csv
+      hash: md5
+      md5: 85d37ce84034e704702c84d6e5c05a8c
+      size: 22281394
+    - path: params.yaml
+      hash: md5
+      md5: c54e09604432abbe222e3baa2f331955
+      size: 270
+    - path: src/components/data_preprocessing.py
+      hash: md5
+      md5: 979983dd193176ed6d53cf06b760e9ef
+      size: 4668
+    outs:
+    - path: data/processed/processed.csv
+      hash: md5
+      md5: 034d62f0d042725de1355eb8324ff43e
+      size: 27449265
+    - path: src/artifacts/encoder.pkl
+      hash: md5
+      md5: 520ce232741080c71530138540733292
+      size: 5590

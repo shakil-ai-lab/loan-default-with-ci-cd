@@ -1,3 +1,8 @@
 data_ingestion:
-  raw_data_path: data/raw/loan.csv
+  raw_data_path: data/raw/loan_default.csv
   clean_data_path: data/interim/cleaned.csv
+
+data_preprocessing:
+  input_data_path: data/interim/cleaned.csv
+  processed_data_path: data/processed/processed.csv
+  encoder_path: src/artifacts/encoder.pkl  
