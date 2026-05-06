@@ -13,10 +13,10 @@ model_training:
   scaler_path: src/artifacts/scaler.pkl
 
   test_size: 0.3
-  random_state: 42
+  random_state: 20
 
   model_params:
-    C: 0.10728990079492859
+    C: 0.10728990079492858
     penalty: l1
     solver: liblinear
     max_iter: 1000    

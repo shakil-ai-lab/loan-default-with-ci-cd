@@ -1,0 +1,14 @@
+artifact_uri: file:///D:/Professional_Ml_Projects/loan-default%20with%20ci-cd/mlruns/678438042250311492/4d30ef75acac477296e09503a9260aa3/artifacts
+end_time: 1778059506549
+entry_point_name: ''
+experiment_id: '678438042250311492'
+lifecycle_stage: active
+run_id: 4d30ef75acac477296e09503a9260aa3
+run_name: youthful-ape-699
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1778059492912
+status: 3
+tags: []
+user_id: sanja

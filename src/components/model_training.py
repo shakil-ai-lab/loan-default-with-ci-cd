@@ -5,6 +5,7 @@ import logging
 import joblib
 import mlflow
 import mlflow.sklearn
+from pathlib import Path
 
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
@@ -161,7 +162,10 @@ def run_training(config_path="params.yaml"):
         config = read_params(config_path)["model_training"]
 
         # MLflow setup
-        mlflow.set_experiment("Loan_Default_Prediction")
+        tracking_dir = Path("mlruns").resolve().as_uri()
+        mlflow.set_tracking_uri(tracking_dir)
+        mlflow.set_experiment("Loan_Default_")
+        mlflow.set_experiment("Loan_Default_")
 
         with mlflow.start_run():
 
@@ -212,3 +216,5 @@ def run_training(config_path="params.yaml"):
 # ---------------- MAIN ---------------- #
 if __name__ == "__main__":
     run_training()
+    print("tracking uri:", mlflow.get_tracking_uri())
+    print("experiment:", mlflow.get_experiment_by_name("Loan_Default_"))
