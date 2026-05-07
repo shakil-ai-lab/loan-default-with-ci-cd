@@ -1,0 +1,10 @@
+artifact_location: file:///D:/Professional_Ml_Projects/loan-default%20with%20ci-cd/mlruns/176775713058903714/models/m-8f7f0d056dda40f6896aa46c90f1103e/artifacts
+creation_timestamp: 1778061227427
+experiment_id: '176775713058903714'
+last_updated_timestamp: 1778061234364
+model_id: m-8f7f0d056dda40f6896aa46c90f1103e
+model_type: null
+name: model
+source_run_id: 25452a2041c945d7ad1e726a6249928b
+status: 2
+status_message: null

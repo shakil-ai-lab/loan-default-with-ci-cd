@@ -1,0 +1,14 @@
+artifact_uri: file:///D:/Professional_Ml_Projects/loan-default%20with%20ci-cd/mlruns/176775713058903714/25452a2041c945d7ad1e726a6249928b/artifacts
+end_time: 1778061234670
+entry_point_name: ''
+experiment_id: '176775713058903714'
+lifecycle_stage: active
+run_id: 25452a2041c945d7ad1e726a6249928b
+run_name: omniscient-mare-719
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1778061216938
+status: 3
+tags: []
+user_id: sanja

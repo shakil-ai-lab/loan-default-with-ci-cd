@@ -1,0 +1,8 @@
+artifact_location: file:///D:/Professional_Ml_Projects/loan-default%20with%20ci-cd/mlruns/176775713058903714
+creation_time: 1778061215756
+experiment_id: '176775713058903714'
+last_update_time: 1778061215756
+lifecycle_stage: active
+name: Loan_Default
+trace_location: null
+workspace: default

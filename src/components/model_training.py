@@ -6,6 +6,7 @@ import joblib
 import mlflow
 import mlflow.sklearn
 from pathlib import Path
+from mlflow.tracking import MlflowClient
 
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
@@ -161,11 +162,10 @@ def run_training(config_path="params.yaml"):
     try:
         config = read_params(config_path)["model_training"]
 
-        # MLflow setup
+        # ---------------- MLflow Setup ---------------- #
         tracking_dir = Path("mlruns").resolve().as_uri()
         mlflow.set_tracking_uri(tracking_dir)
-        mlflow.set_experiment("Loan_Default_")
-        mlflow.set_experiment("Loan_Default_")
+        mlflow.set_experiment("Loan_Default")
 
         with mlflow.start_run():
 
@@ -189,16 +189,37 @@ def run_training(config_path="params.yaml"):
             # Evaluate
             metrics = evaluate_model(model, X_test_scaled, y_test)
 
-            # Log params
+            # ---------------- MLflow Logging ---------------- #
             mlflow.log_params(config["model_params"])
-
-            # Log metrics
             mlflow.log_metrics(metrics)
 
-            # Log model
             mlflow.sklearn.log_model(model, "model")
 
-            # Save locally
+            # ---------------- MODEL REGISTRY ---------------- #
+            model_name = "LoanDefaultModel"
+
+            run_id = mlflow.active_run().info.run_id
+            model_uri = f"runs:/{run_id}/model"
+
+            result = mlflow.register_model(
+                model_uri=model_uri,
+                name=model_name
+            )
+
+            logging.info(f"Registered model version: {result.version}")
+
+            # ---------------- STAGING TRANSITION ---------------- #
+            client = MlflowClient()
+
+            client.transition_model_version_stage(
+                name=model_name,
+                version=result.version,
+                stage="Staging"
+            )
+
+            logging.info(f"Model version {result.version} moved to Staging")
+
+            # ---------------- SAVE LOCALLY ---------------- #
             save_artifacts(
                 model,
                 scaler,
@@ -213,8 +234,5 @@ def run_training(config_path="params.yaml"):
         raise
 
 
-# ---------------- MAIN ---------------- #
 if __name__ == "__main__":
     run_training()
-    print("tracking uri:", mlflow.get_tracking_uri())
-    print("experiment:", mlflow.get_experiment_by_name("Loan_Default_"))

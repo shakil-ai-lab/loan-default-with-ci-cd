@@ -57,12 +57,12 @@ stages:
       size: 560
     - path: src/components/model_training.py
       hash: md5
-      md5: 31fe24706dfe93d94dc5dfe55e3b9fc6
-      size: 6038
+      md5: e293d7c6dcb907cb611e20b8367535d9
+      size: 6708
     outs:
     - path: models/model.pkl
       hash: md5
-      md5: b77f9cc6581357c04cda2f9693c89f62
+      md5: f80c68b8098612acaeda1bf129582455
       size: 1051
     - path: src/artifacts/scaler.pkl
       hash: md5
