@@ -1,0 +1,49 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Git
+.git/
+.gitignore
+
+# DVC
+.dvc/
+
+# MLflow
+mlruns/
+
+# Logs
+logs/
+*.log
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VS Code / PyCharm
+.vscode/
+.idea/
+
+# Data folders
+data/raw/
+data/interim/
+data/processed/
+
+# Models
+models/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Testing cache
+.pytest_cache/
+
+# Environment variables
+.env

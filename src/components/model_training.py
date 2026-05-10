@@ -1,4 +1,5 @@
 import os
+import dagshub
 import pandas as pd
 import yaml
 import logging
@@ -163,8 +164,13 @@ def run_training(config_path="params.yaml"):
         config = read_params(config_path)["model_training"]
 
         # ---------------- MLflow Setup ---------------- #
-        tracking_dir = Path("mlruns").resolve().as_uri()
-        mlflow.set_tracking_uri(tracking_dir)
+        # tracking_dir = Path("mlruns").resolve().as_uri()
+        mlflow.set_tracking_uri("https://dagshub.com/shakil-ai-lab/loan-default-with-ci-cd.mlflow")
+        dagshub.init(
+        repo_owner='shakil-ai-lab',
+        repo_name='loan-default-with-ci-cd',
+        mlflow=True
+)
         mlflow.set_experiment("Loan_Default")
 
         with mlflow.start_run():

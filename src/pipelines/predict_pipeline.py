@@ -1,106 +1,239 @@
-import pandas as pd
+import os
 import logging
-import yaml
-import joblib
 from pathlib import Path
-import mlflow
 
-# ---------------- LOGGER ---------------- #
+import dagshub
+import joblib
+import mlflow
+import pandas as pd
+import yaml
+
+
+# =========================================================
+# LOGGER CONFIG
+# =========================================================
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-# ---------------- UTILS ---------------- #
+logger = logging.getLogger(__name__)
+
+
+# =========================================================
+# BASE DIRECTORY (Docker + Windows + Linux Safe)
+# =========================================================
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+
+# =========================================================
+# READ PARAMS
+# =========================================================
 def read_params(config_path="params.yaml"):
-    with open(config_path) as f:
-        return yaml.safe_load(f)
-
-
-# ---------------- LOAD ARTIFACTS ---------------- #
-def load_encoder(encoder_path):
+    """
+    Read YAML configuration file
+    """
     try:
-        logging.info("Loading encoder")
-        return joblib.load(encoder_path)
+        config_full_path = os.path.join(BASE_DIR, config_path)
+
+        with open(config_full_path, "r") as yaml_file:
+            config = yaml.safe_load(yaml_file)
+
+        logger.info("params.yaml loaded successfully")
+
+        return config
+
     except Exception as e:
-        logging.error(f"Error loading encoder: {e}")
+        logger.error(f"Error reading params.yaml: {e}")
         raise
 
 
-def load_scaler(scaler_path):
+# =========================================================
+# LOAD LOCAL ARTIFACTS
+# =========================================================
+def load_local_artifact(relative_path):
+    """
+    Load local artifacts from Docker container / local filesystem
+    """
+
     try:
-        logging.info("Loading scaler")
-        return joblib.load(scaler_path)
+        full_path = os.path.join(BASE_DIR, relative_path)
+
+        logger.info(f"Loading local artifact from: {full_path}")
+
+        artifact = joblib.load(full_path)
+
+        logger.info("Artifact loaded successfully")
+
+        return artifact
+
     except Exception as e:
-        logging.error(f"Error loading scaler: {e}")
+        logger.error(f"Error loading artifact: {e}")
         raise
 
 
-def load_model_from_registry(model_name, stage="Staging"):
-    try:
-        logging.info(f"Loading model from MLflow Registry: {model_name} ({stage})")
+# =========================================================
+# DAGSHUB + MLFLOW SETUP
+# =========================================================
+def setup_mlflow():
+    """
+    Configure DagsHub MLflow tracking
+    """
 
-        tracking_dir = Path("mlruns").resolve().as_uri()
-        mlflow.set_tracking_uri(tracking_dir)
+    try:
+        dagshub.init(
+            repo_owner="shakil-ai-lab",
+            repo_name="loan-default-with-ci-cd",
+            mlflow=True
+        )
+
+        mlflow.set_tracking_uri(
+            "https://dagshub.com/shakil-ai-lab/loan-default-with-ci-cd.mlflow"
+        )
+
+        logger.info("DagsHub + MLflow configured successfully")
+
+    except Exception as e:
+        logger.error(f"Error configuring MLflow: {e}")
+        raise
+
+
+# =========================================================
+# LOAD MODEL FROM REGISTRY
+# =========================================================
+def load_model_from_registry(
+    model_name="LoanDefaultModel",
+    stage="Production"
+):
+    """
+    Load model dynamically from MLflow Registry
+    """
+
+    try:
+        logger.info(
+            f"Loading model from registry: {model_name} ({stage})"
+        )
 
         model_uri = f"models:/{model_name}/{stage}"
+
         model = mlflow.sklearn.load_model(model_uri)
 
-        logging.info("Model loaded successfully")
+        logger.info("Model loaded successfully from registry")
+
         return model
 
     except Exception as e:
-        logging.error(f"Error loading model: {e}")
+        logger.error(f"Error loading model from registry: {e}")
         raise
 
 
-# ---------------- PREPROCESS INPUT ---------------- #
-def preprocess_input(input_data, encoder, scaler):
-    try:
-        logging.info("Preprocessing input data")
+# =========================================================
+# LOAD ALL OBJECTS ONCE (IMPORTANT FOR FASTAPI PERFORMANCE)
+# =========================================================
+try:
 
+    logger.info("Initializing prediction pipeline objects")
+
+    config = read_params()
+
+    # Setup MLflow
+    setup_mlflow()
+
+    # Load encoder
+    encoder = load_local_artifact(
+        config["data_preprocessing"]["encoder_path"]
+    )
+
+    # Load scaler
+    scaler = load_local_artifact(
+        config["model_training"]["scaler_path"]
+    )
+
+    # Load model
+    model = load_model_from_registry(
+        model_name="LoanDefaultModel",
+        stage="Production"
+    )
+
+    logger.info("All prediction objects initialized successfully")
+
+except Exception as e:
+    logger.error(f"Pipeline initialization failed: {e}")
+    raise
+
+
+# =========================================================
+# PREPROCESS INPUT
+# =========================================================
+def preprocess_input(input_data):
+    """
+    Preprocess incoming input data
+    """
+
+    try:
+        logger.info("Starting input preprocessing")
+
+        # Convert input dict to dataframe
         df = pd.DataFrame([input_data])
 
+        logger.info("Input converted to DataFrame")
+
         # Apply encoder
-        encoded = encoder.transform(df)
+        encoded_data = encoder.transform(df)
+
+        logger.info("Encoding completed")
 
         # Apply scaler
-        scaled = scaler.transform(encoded)
+        scaled_data = scaler.transform(encoded_data)
 
-        return scaled
+        logger.info("Scaling completed")
+
+        return scaled_data
 
     except Exception as e:
-        logging.error(f"Error preprocessing input: {e}")
+        logger.error(f"Error during preprocessing: {e}")
         raise
 
 
-# ---------------- PREDICT ---------------- #
-def predict(input_data, config_path="params.yaml"):
+# =========================================================
+# PREDICT FUNCTION
+# =========================================================
+def predict(input_data):
+    """
+    Predict loan default
+    """
+
     try:
-        config = read_params(config_path)
+        logger.info("Prediction request received")
 
-        encoder_path = config["data_preprocessing"]["encoder_path"]
-        scaler_path = config["model_training"]["scaler_path"]
+        # Preprocess
+        processed_input = preprocess_input(input_data)
 
-        model_name = "LoanDefaultModel"
-
-        encoder = load_encoder(encoder_path)
-        scaler = load_scaler(scaler_path)
-        model = load_model_from_registry(model_name)
-
-        processed_input = preprocess_input(input_data, encoder, scaler)
-
+        # Prediction
         prediction = model.predict(processed_input)
 
-        return int(prediction[0])
+        # Probability
+        probability = model.predict_proba(processed_input)
+
+        result = {
+            "prediction": int(prediction[0]),
+            "default_probability": round(float(probability[0][1]), 4)
+        }
+
+        logger.info(f"Prediction successful: {result}")
+
+        return result
 
     except Exception as e:
-        logging.error(f"Prediction failed: {e}")
+        logger.error(f"Prediction failed: {e}")
         raise
 
 
-# ---------------- MAIN TEST ---------------- #
+# =========================================================
+# MAIN TEST
+# =========================================================
 if __name__ == "__main__":
+
     sample_input = {
         "Age": 35,
         "Income": 60000,
@@ -120,5 +253,6 @@ if __name__ == "__main__":
         "HasCoSigner": "No"
     }
 
-    result = predict(sample_input)
-    print("Prediction:", result)
+    prediction_result = predict(sample_input)
+
+    print(prediction_result)
