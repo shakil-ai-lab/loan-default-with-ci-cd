@@ -115,6 +115,6 @@ class PredictionResponse(BaseModel):
         description="0 = No Default, 1 = Default"
     )
 
-    result: str = Field(
-        description="Human-readable prediction"
+    default_probability: float = Field(
+        description="Probability of loan default"
     )

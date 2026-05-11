@@ -103,7 +103,7 @@ def setup_mlflow():
 # =========================================================
 def load_model_from_registry(
     model_name="LoanDefaultModel",
-    stage="Production"
+    stage="Staging"
 ):
     """
     Load model dynamically from MLflow Registry
@@ -152,7 +152,7 @@ try:
     # Load model
     model = load_model_from_registry(
         model_name="LoanDefaultModel",
-        stage="Production"
+        stage="Staging"
     )
 
     logger.info("All prediction objects initialized successfully")
@@ -249,7 +249,7 @@ if __name__ == "__main__":
         "MaritalStatus": "Single",
         "HasMortgage": "No",
         "HasDependents": "Yes",
-        "LoanPurpose": "Personal",
+        "LoanPurpose": "Home",
         "HasCoSigner": "No"
     }
 

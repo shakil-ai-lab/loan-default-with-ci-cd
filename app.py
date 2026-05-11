@@ -30,8 +30,8 @@ def prediction(data: LoanInput):
     result = predict(input_data)
 
     response = PredictionResponse(
-        prediction=int(result),
-        result="Default" if result == 1 else "No Default"
+        prediction=int(result["prediction"]),
+        default_probability=result["default_probability"]
     )
 
     return response

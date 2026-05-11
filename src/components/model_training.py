@@ -199,19 +199,18 @@ def run_training(config_path="params.yaml"):
             mlflow.log_params(config["model_params"])
             mlflow.log_metrics(metrics)
 
-            mlflow.sklearn.log_model(model, "model")
-
-            # ---------------- MODEL REGISTRY ---------------- #
-            model_name = "LoanDefaultModel"
-
-            run_id = mlflow.active_run().info.run_id
-            model_uri = f"runs:/{run_id}/model"
-
-            result = mlflow.register_model(
-                model_uri=model_uri,
-                name=model_name
+            model_info = mlflow.sklearn.log_model(
+            sk_model=model,
+            name="LoanDefaultModel"
             )
 
+                # ---------------- MODEL REGISTRY ---------------- #
+            model_name = "LoanDefaultModel"
+
+            result = mlflow.register_model(
+            model_uri=model_info.model_uri,
+            name="LoanDefaultModel"
+            )
             logging.info(f"Registered model version: {result.version}")
 
             # ---------------- STAGING TRANSITION ---------------- #
