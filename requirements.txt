@@ -21,3 +21,6 @@ requests==2.32.4
 python-dotenv==1.2.2
 
 dagshub==0.7.0
+
+streamlit==1.47.0
+plotly
