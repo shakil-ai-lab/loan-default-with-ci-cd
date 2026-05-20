@@ -23,4 +23,7 @@ python-dotenv==1.2.2
 dagshub==0.7.0
 
 streamlit==1.47.0
-plotly
+plotly==6.7.0
+
+pytest==9.0.3
+httpx==0.28.1
